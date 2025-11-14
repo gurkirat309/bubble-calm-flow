@@ -94,6 +94,16 @@ const Index = () => {
     currentOscillatorRef.current = oscillator;
   };
 
+  // Update volume in real-time without interrupting audio
+  useEffect(() => {
+    if (gainNodeRef.current && audioContextRef.current) {
+      gainNodeRef.current.gain.setValueAtTime(
+        volume[0] / 100 * 0.15, 
+        audioContextRef.current.currentTime
+      );
+    }
+  }, [volume]);
+
   // Initialize particles
   const initParticles = (canvas: HTMLCanvasElement) => {
     const particles: Particle[] = [];
