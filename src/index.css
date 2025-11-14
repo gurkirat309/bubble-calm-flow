@@ -8,45 +8,45 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 40% 12%;
-    --foreground: 180 100% 95%;
+    --background: 200 30% 96%;
+    --foreground: 220 40% 20%;
 
-    --card: 220 35% 15%;
-    --card-foreground: 180 100% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 40% 20%;
 
-    --popover: 220 35% 15%;
-    --popover-foreground: 180 100% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 40% 20%;
 
-    --primary: 180 80% 60%;
-    --primary-foreground: 220 40% 10%;
+    --primary: 180 70% 45%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 270 70% 65%;
-    --secondary-foreground: 220 40% 10%;
+    --secondary: 270 60% 70%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 30% 20%;
-    --muted-foreground: 180 20% 70%;
+    --muted: 210 30% 92%;
+    --muted-foreground: 220 20% 45%;
 
-    --accent: 160 70% 55%;
-    --accent-foreground: 220 40% 10%;
+    --accent: 160 60% 50%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 30% 25%;
-    --input: 220 30% 25%;
-    --ring: 180 80% 60%;
+    --border: 220 20% 85%;
+    --input: 220 20% 85%;
+    --ring: 180 70% 45%;
 
     --radius: 1rem;
 
     /* Calming game colors */
-    --bubble-primary: 180 80% 60%;
-    --bubble-glow: 180 100% 70%;
-    --particle-cyan: 180 70% 70%;
-    --particle-purple: 270 60% 70%;
-    --particle-pink: 320 60% 75%;
-    --gradient-start: 220 50% 15%;
-    --gradient-mid: 200 60% 25%;
-    --gradient-end: 270 50% 30%;
+    --bubble-primary: 180 70% 55%;
+    --bubble-glow: 180 80% 65%;
+    --particle-cyan: 180 60% 60%;
+    --particle-purple: 270 50% 65%;
+    --particle-pink: 320 50% 70%;
+    --gradient-start: 200 40% 90%;
+    --gradient-mid: 210 45% 85%;
+    --gradient-end: 270 35% 88%;
 
     /* Transitions */
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
