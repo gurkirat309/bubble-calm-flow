@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Volume2 } from "lucide-react";
 
 interface Particle {
   x: number;
@@ -19,11 +21,16 @@ const Index = () => {
   const [phase, setPhase] = useState("Ready");
   const [syncPercentage, setSyncPercentage] = useState(100);
   const [breathingMode, setBreathingMode] = useState("balanced");
+  const [volume, setVolume] = useState([50]);
   const animationRef = useRef<number>();
   const startTimeRef = useRef<number>(0);
   const isPressingRef = useRef(false);
   const pressStartTimeRef = useRef<number>(0);
   const particlesRef = useRef<Particle[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const currentOscillatorRef = useRef<OscillatorNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const previousPhaseRef = useRef<string>("Ready");
 
   // Breathing patterns
   const breathingPatterns = {
@@ -44,6 +51,47 @@ const Index = () => {
 
   const easeOutQuad = (t: number): number => {
     return 1 - (1 - t) * (1 - t);
+  };
+
+  // Initialize audio context
+  const initAudio = () => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      gainNodeRef.current = audioContextRef.current.createGain();
+      gainNodeRef.current.connect(audioContextRef.current.destination);
+    }
+  };
+
+  // Play sound for phase
+  const playPhaseSound = (phaseName: string) => {
+    if (!audioContextRef.current || !gainNodeRef.current) return;
+    
+    // Stop current sound
+    if (currentOscillatorRef.current) {
+      currentOscillatorRef.current.stop();
+      currentOscillatorRef.current = null;
+    }
+
+    // Create new oscillator for the phase
+    const oscillator = audioContextRef.current.createOscillator();
+    oscillator.connect(gainNodeRef.current);
+    
+    // Set frequency based on phase
+    if (phaseName === "Inhale") {
+      oscillator.frequency.setValueAtTime(220, audioContextRef.current.currentTime); // A3 - calming
+      oscillator.type = "sine";
+    } else if (phaseName === "Exhale") {
+      oscillator.frequency.setValueAtTime(174, audioContextRef.current.currentTime); // F3 - relaxing
+      oscillator.type = "sine";
+    } else {
+      return; // No sound for Hold or Rest
+    }
+
+    // Set volume
+    gainNodeRef.current.gain.setValueAtTime(volume[0] / 100 * 0.15, audioContextRef.current.currentTime);
+    
+    oscillator.start();
+    currentOscillatorRef.current = oscillator;
   };
 
   // Initialize particles
@@ -153,6 +201,12 @@ const Index = () => {
 
       setPhase(currentPhase);
 
+      // Play sound when phase changes
+      if (currentPhase !== previousPhaseRef.current) {
+        playPhaseSound(currentPhase);
+        previousPhaseRef.current = currentPhase;
+      }
+
       // Calculate sync percentage
       if (isPressingRef.current) {
         const pressDuration = (timestamp - pressStartTimeRef.current) / 1000;
@@ -239,22 +293,32 @@ const Index = () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      if (currentOscillatorRef.current) {
+        currentOscillatorRef.current.stop();
+      }
       window.removeEventListener("resize", resizeCanvas);
     };
-  }, [isActive, TOTAL_CYCLE, CYCLE.inhale, CYCLE.hold, CYCLE.exhale, CYCLE.rest]);
+  }, [isActive, TOTAL_CYCLE, CYCLE.inhale, CYCLE.hold, CYCLE.exhale, CYCLE.rest, volume]);
 
   const handleStart = () => {
+    initAudio();
     setIsActive(true);
     startTimeRef.current = 0;
     setSyncPercentage(100);
+    previousPhaseRef.current = "Ready";
   };
 
   const handleReset = () => {
+    if (currentOscillatorRef.current) {
+      currentOscillatorRef.current.stop();
+      currentOscillatorRef.current = null;
+    }
     setIsActive(false);
     startTimeRef.current = 0;
     setPhase("Ready");
     setSyncPercentage(100);
     isPressingRef.current = false;
+    previousPhaseRef.current = "Ready";
   };
 
   const handleMouseDown = () => {
@@ -335,6 +399,23 @@ const Index = () => {
             </div>
           </div>
         )}
+
+        {/* Volume control */}
+        <div className="absolute top-8 left-8 pointer-events-auto">
+          <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4 shadow-lg w-48">
+            <div className="flex items-center gap-3 mb-2">
+              <Volume2 className="w-4 h-4 text-muted-foreground" />
+              <Label className="text-xs text-muted-foreground">Volume</Label>
+            </div>
+            <Slider
+              value={volume}
+              onValueChange={setVolume}
+              max={100}
+              step={1}
+              className="w-full"
+            />
+          </div>
+        </div>
 
         {/* Sync percentage */}
         {isActive && (
