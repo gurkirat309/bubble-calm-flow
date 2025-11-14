@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface Particle {
   x: number;
@@ -16,19 +18,23 @@ const Index = () => {
   const [isActive, setIsActive] = useState(false);
   const [phase, setPhase] = useState("Ready");
   const [syncPercentage, setSyncPercentage] = useState(100);
+  const [breathingMode, setBreathingMode] = useState("balanced");
   const animationRef = useRef<number>();
   const startTimeRef = useRef<number>(0);
   const isPressingRef = useRef(false);
   const pressStartTimeRef = useRef<number>(0);
   const particlesRef = useRef<Particle[]>([]);
 
-  // Breathing cycle times (in seconds)
-  const CYCLE = {
-    inhale: 4,
-    hold: 2,
-    exhale: 6,
-    rest: 2,
+  // Breathing patterns
+  const breathingPatterns = {
+    balanced: { inhale: 4, hold: 2, exhale: 6, rest: 2, name: "Balanced" },
+    calm: { inhale: 4, hold: 0, exhale: 6, rest: 4, name: "Calm Mode" },
+    focus: { inhale: 5, hold: 0, exhale: 5, rest: 0, name: "Focus Mode" },
+    sleep: { inhale: 4, hold: 0, exhale: 8, rest: 0, name: "Sleep Mode" },
+    stress: { inhale: 4, hold: 4, exhale: 4, rest: 4, name: "Stress Relief" },
   };
+
+  const CYCLE = breathingPatterns[breathingMode as keyof typeof breathingPatterns];
   const TOTAL_CYCLE = CYCLE.inhale + CYCLE.hold + CYCLE.exhale + CYCLE.rest;
 
   // Easing functions
@@ -292,6 +298,34 @@ const Index = () => {
             Follow the bubble's breath to find calm
           </p>
         </div>
+
+        {/* Breathing Mode Selector */}
+        {!isActive && (
+          <div className="absolute top-36 left-1/2 -translate-x-1/2 pointer-events-auto">
+            <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4 shadow-lg">
+              <Label className="text-xs text-muted-foreground mb-3 block text-center">
+                Choose Your Breathing Pattern
+              </Label>
+              <RadioGroup
+                value={breathingMode}
+                onValueChange={setBreathingMode}
+                className="grid grid-cols-2 md:grid-cols-5 gap-3"
+              >
+                {Object.entries(breathingPatterns).map(([key, pattern]) => (
+                  <div key={key} className="flex items-center space-x-2">
+                    <RadioGroupItem value={key} id={key} />
+                    <Label
+                      htmlFor={key}
+                      className="text-sm text-foreground cursor-pointer font-light"
+                    >
+                      {pattern.name}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+          </div>
+        )}
 
         {/* Phase indicator */}
         {isActive && (
